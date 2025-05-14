@@ -16,10 +16,20 @@ export default function SignupPage() {
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
+  const [passwordsMatch, setPasswordsMatch] = useState(true)
   const [isLoading, setIsLoading] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    // Check if passwords match
+    if (password !== confirmPassword) {
+      setPasswordsMatch(false)
+      return
+    }
+
+    setPasswordsMatch(true)
     setIsLoading(true)
 
     // Simulate API call
@@ -115,6 +125,25 @@ export default function SignupPage() {
                 </button>
               </div>
               <p className="text-xs text-gray-500">Password must be at least 8 characters long</p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <Input
+                  id="confirmPassword"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  value={confirmPassword}
+                  onChange={(e) => {
+                    setConfirmPassword(e.target.value)
+                    setPasswordsMatch(true) // Reset error when typing
+                  }}
+                  className={`pl-10 pr-10 ${!passwordsMatch ? "border-red-500" : ""}`}
+                  required
+                />
+              </div>
+              {!passwordsMatch && <p className="text-xs text-red-500">Passwords do not match</p>}
             </div>
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? "Creating account..." : "Create account"}

@@ -21,15 +21,36 @@ export default function LoginPage() {
     e.preventDefault()
     setIsLoading(true)
 
-    // Simulate API call
     try {
-      // Replace with actual authentication logic
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-      console.log("Login attempt with:", { email, password })
-      // Redirect to dashboard on success
-      window.location.href = "/dashboard"
+      const response = await fetch("http://localhost:8080/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username: email,
+          password: password,
+        }),
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        console.log("Login successful:", data)
+        // Store token if provided
+        if (data.token) {
+          localStorage.setItem("authToken", data.token)
+        }
+        // Redirect to dashboard on success
+        window.location.href = "/dashboard"
+      } else {
+        const errorData = await response.json()
+        console.error("Login failed:", errorData)
+        // Handle error - you can add error state and display to user
+        alert(errorData.message || "Login failed. Please check your credentials.")
+      }
     } catch (error) {
-      console.error("Login failed:", error)
+      console.error("Login error:", error)
+      alert("Network error. Please try again.")
     } finally {
       setIsLoading(false)
     }
@@ -43,8 +64,8 @@ export default function LoginPage() {
       // Replace with actual Google authentication logic
       await new Promise((resolve) => setTimeout(resolve, 1000))
       console.log("Google sign-in attempt")
-      // Redirect to dashboard on success
-      window.location.href = "/dashboard"
+      // Redirect to home on success
+      window.location.href = "/home"
     } catch (error) {
       console.error("Google sign-in failed:", error)
     } finally {

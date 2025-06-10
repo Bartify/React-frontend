@@ -11,6 +11,14 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 
+// Add this helper function at the top of the component
+const splitFullName = (fullName: string) => {
+  const nameParts = fullName.trim().split(" ")
+  const firstName = nameParts[0] || ""
+  const lastName = nameParts.slice(1).join(" ") || ""
+  return { firstName, lastName }
+}
+
 export default function SignupPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [name, setName] = useState("")
@@ -20,6 +28,7 @@ export default function SignupPage() {
   const [passwordsMatch, setPasswordsMatch] = useState(true)
   const [isLoading, setIsLoading] = useState(false)
 
+  // Replace the handleSubmit function with:
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
@@ -32,15 +41,37 @@ export default function SignupPage() {
     setPasswordsMatch(true)
     setIsLoading(true)
 
-    // Simulate API call
     try {
-      // Replace with actual registration logic
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-      console.log("Signup attempt with:", { name, email, password })
-      // Redirect to dashboard on success
-      window.location.href = "/dashboard"
+      const { firstName, lastName } = splitFullName(name)
+
+      const response = await fetch("http://localhost:8080/api/auth/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username: email,
+          password: password,
+          firstName: firstName,
+          lastName: lastName,
+        }),
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        console.log("Signup successful:", data)
+        // Redirect to login on success'
+        window.location.href = "/login"
+        alert("Signup successful! Redirecting to dashboard...")
+      } else {
+        const errorData = await response.json()
+        console.error("Signup failed:", errorData)
+        // Handle error - you can add error state and display to user
+        alert(errorData.message || "Signup failed. Please try again.")
+      }
     } catch (error) {
-      console.error("Signup failed:", error)
+      console.error("Signup error:", error)
+      alert("Network error. Please try again.")
     } finally {
       setIsLoading(false)
     }
